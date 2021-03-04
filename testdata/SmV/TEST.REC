@@ -1,0 +1,85 @@
+[General]
+BatchID=XXXXXX.Y
+Recipe=recipe
+Operator=Engineer
+SampleSize=200 // mm
+SampleOrientationMarkType=NOTCH
+OrientationMarkLocation=DOWN
+ActiveDies=1000
+SelectedDies=30
+ActivePoints=1
+DieSizeX=1050.0 // µm
+DieSizeY=950.0 // µm
+StartTime=02-06-19 16:32:53
+EndTime=In progress
+
+[Run]
+WaferID=XXXXXXXX
+FromCassette=1
+FromSlot=24
+FromIndexer=1
+ToSlot=24
+ToIndexer=1
+StartTime=02-06-19 17:24:52
+EndTime=02-06-19 17:26:48
+Status=PASS
+VisitedDies=30
+StatisticDies=30 // (100.0 %)
+GoodDies=30 // (100.0 %)
+BadDies=0 // (0.0 %)
+NotMeasDies=0 // (0.0 %)
+VisitedPoints=30
+StatisticPoints=30 // (100.0 %)
+GoodPoints=30 // (100.0 %)
+BadPoints=0 // (0.0 %)
+NotMeasPoints=0 // (0.0 %)
+RepeatedMeas=0
+ThicknessMin=9.091 // --
+ThicknessMax=9.491 // --
+ThicknessMean=9.248 // --
+ThicknessMedian=9.164 // --
+ThicknessSTD=0.134 // -- (1.4 %)
+HeightMin=2.053 // --
+HeightMax=3.639 // --
+HeightMean=2.915 // --
+HeightMedian=2.930 // --
+HeightSTD=0.428 // -- (14.7 %)
+QualityMin=0.687
+QualityMax=1.566
+QualityMean=1.167
+QualityMedian=1.214 // --
+QualitySTD=0.233 // (19.9 %)
+
+[Data]
+// Num	Col/Row	Thick1	Thick2	Qual	Bin
+   1	 15/-92	9.42	3.01	0.99	1
+   2	 15/-61	9.09	3.64	1.10	1
+   3	 15/-30	9.13	3.53	1.24	1
+   4	 15/  1	9.12	3.37	1.49	1
+   5	 15/ 32	9.16	3.13	1.48	1
+   6	 15/ 63	9.15	2.93	1.05	1
+   7	 15/ 94	9.49	2.63	0.87	1
+   8	-16/ 94	9.49	2.68	0.80	1
+   9	-16/ 63	9.14	2.93	1.11	1
+  10	 46/ 63	9.26	2.37	0.93	1
+  11	 46/ 32	9.13	2.91	1.15	1
+  12	-47/ 63	9.29	2.44	0.69	1
+  13	-16/ 32	9.17	3.26	1.52	1
+  14	-47/ 32	9.15	3.00	0.87	1
+  15	-78/ 32	9.45	2.05	1.22	1
+  16	-16/  1	9.12	3.36	1.50	1
+  17	-16/-30	9.15	3.61	1.12	1
+  18	 46/  1	9.14	3.24	1.57	1
+  19	 46/-30	9.12	3.05	1.40	1
+  20	-47/  1	9.16	3.00	1.29	1
+  21	-78/  1	9.35	2.59	1.28	1
+  22	-47/-30	9.15	3.01	1.27	1
+  23	-78/-30	9.43	2.61	0.84	1
+  24	-16/-61	9.13	3.59	0.90	1
+  25	-16/-91	9.44	2.60	1.12	1
+  26	-47/-61	9.23	2.93	1.21	1
+  27	 46/-61	9.23	2.91	1.22	1
+  28	 77/  1	9.33	2.59	1.30	1
+  29	 77/-30	9.39	2.28	1.22	1
+  30	 77/ 32	9.42	2.18	1.25	1
+
