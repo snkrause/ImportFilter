@@ -77,7 +77,7 @@ class Importfile:
             self._process_raw_data_smv()
         if self.equipment=='Elli':
             self._read_elli_data()
-            #self._process_raw_data_elli()
+            self._process_raw_data_elli()
         else: 
             return self
         self.data.dropna(axis=1, how='all',inplace=True)
@@ -118,6 +118,7 @@ class Importfile:
         None.
 
         """
+        
         #open file
         with open(self.path_data) as f:
             lines = f.readlines()
@@ -125,7 +126,7 @@ class Importfile:
         #find beginning and end of each measurement
         points_measured=[int(lines[k].split(':')[1].strip()) for k in range(len(lines)) if 'Points Measured' in lines[k]]
         start=[k for k in range(len(lines)) if str(lines[k])[0:5]=="Point" and str(lines[k])[0:6]!="Points"]
-        header_start=[k for k in range(len(lines)) if 'Wafer Number' in lines[k]]
+        header_start=[k for k in range(len(lines)) if 'Wafer Number' in lines[k] or 'Slot Number' in lines[k]]
         header_end=[k for k in range(len(lines)) if 'Points Measured' in lines[k]]
         
         #loop through the measurements
@@ -142,30 +143,63 @@ class Importfile:
                     names_col.append(names[i]+'_'+str(n))
                     if k == len(dupl_cols):
                         n=n+1
-                        k=1
+                        k=0
                     k=k+1
                 else:
                     names_col.append(names[i])
-                    
+            
             #transform lines into Dataframe and name columns
             df_wafer=pd.DataFrame(lines[start[m]+1:start[m]+points_measured[m]+1])
-            df_wafer_2=df_wafer[0].str.replace('nm','').str.lstrip().str.rstrip().str.split('\s+', expand=True).replace('N/A',np.nan)
-            df_wafer_2.columns=names_col
+            
+            #check if first line is empty and adjust data lines if neccessary
+            if len(str(df_wafer.iloc[0]))<50:
+                df_wafer=pd.DataFrame(lines[start[m]+2:start[m]+points_measured[m]+2])
+            
+            #catch aborted measurements
+            if df_wafer.index[df_wafer[0].str.contains('Wafer')] !='':
+                df_wafer=df_wafer.drop(range(df_wafer.index[df_wafer[0].str.contains('Wafer')].item(),len(df_wafer)))
+            
+            #remove measurement unit and prepare unit column
+            if df_wafer[0].str.contains('Å').any():
+                df_wafer=df_wafer[0].str.replace('Å','').str.lstrip().str.rstrip()
+                unit='Å'                
+            else:
+                df_wafer=df_wafer[0].str.replace('nm','').str.lstrip().str.rstrip()
+                unit='nm'
+  
+            #split lines into columns
+            df_wafer_2=df_wafer.str.split('\s+', expand=True).replace('N/A',np.nan)
+            
+            #add column names
+            if len(df_wafer_2.columns)==len(names_col):
+                df_wafer_2.columns=names_col
+            elif len(df_wafer_2.columns)<len(names_col):
+                df_wafer_2[len(df_wafer_2.columns)+1]=np.nan
+                df_wafer_2.columns=names_col
+            elif (len(df_wafer_2.columns)-len(names_col))==2:
+                names_col.append('flag_1')
+                names_col.append('flag_2')
+                df_wafer_2.columns=names_col
+            else:
+                names_col.append('flag')
+                df_wafer_2.columns=names_col
             
             #convert all columns into float
             for column in df_wafer_2.columns:
-                df_wafer_2[column]=df_wafer_2[column].astype('float32')
-           
+                df_wafer_2[column]=df_wafer_2[column].astype('float32', errors='ignore')
+
+            #add unit column
+            df_wafer_2['unit']=unit
+            
             #add header information
             for o in range(header_start[m],header_end[m]):
-                df_wafer_2[lines[o].split(':')[0].strip()]=lines[o].split(':')[1].strip()
-            
-            #add 'wafer_id'
-            if len(df_wafer_2['Wafer Number'][0])<2:
-                df_wafer_2['wafer_id']=df_wafer_2['Lot ID'][0].split('.')[0]+'-0'+df_wafer_2['Wafer Number'][0]
-            else:
-                df_wafer_2['wafer_id']=df_wafer_2['Lot ID'][0].split('.')[0]+'-'+df_wafer_2['Wafer Number'][0]
-            
+                if lines[o]=='\n':
+                    continue
+                try:
+                    df_wafer_2[lines[o].split(': ')[0].strip()]=lines[o].split(': ')[1].strip()
+                except:
+                    df_wafer_2[lines[o].split(':\t')[0].strip()]=lines[o].split(':\t')[1].strip()
+                        
             #append wafer data 
             if m==0:           
                 df_file=df_wafer_2
@@ -174,12 +208,47 @@ class Importfile:
                 
         #add general header information
         for h in range(header_start[0]):
-            df_file[lines[h].split(':')[0].strip()]=lines[h].split(':')[1].strip()
-            
-
-        df_file['R_(mm)']=(df_file['X']**2+df_file['Y']**2)**0.5
-        
+            if lines[h]=='\n':
+                    continue
+            try:
+                df_file[lines[h].split(': ')[0].strip()]=lines[h].split(': ')[1].strip()
+            except:
+                df_file[lines[h].split(':\t')[0].strip()]=lines[h].split(':\t')[1].strip()   
+       
         self.data=df_file
+
+    def _process_raw_data_elli(self):
+        """
+        Transfer of header information into separate columns and creation of standard columns "m_date", "lot_id", "wafer_id", "product", and "recipe".
+        There is also a couple of operations in there:
+            - Calculate radius r
+            - Transfer "Time" into datetime format
+            - Create wafer_id in standard format XXXXXX-YY            
+        
+        Returns
+        -------
+        None.
+
+        """
+        #create and calculate columns described above
+        self.data = self.data.rename(index=str, columns={"Slot Number":"Wafer Number","Tool Name":"Tool","Port Number":"Cassette Plate","Control Job Run Started":"Cassette Run Started","Error":"flag_1"})
+        #add 'wafer_id'
+        if len(self.data['Wafer Number'][0:1][0])<2:
+            self.data['wafer_id']=self.data['Lot ID'][0:1][0].split('.')[0]+'-0'+self.data['Wafer Number'][0:1][0]
+        else:
+            self.data['wafer_id']=self.data['Lot ID'][0:1][0].split('.')[0]+'-'+self.data['Wafer Number'][0:1][0]
+        self.data['r']=(self.data['X']**2+self.data['Y']**2)**0.5      
+        
+        #transform timestamp into datetime and add as 'mdate'
+        try:
+            self.data['m_date']=pd.to_datetime(self.data['Time'], format='%a %b  %d %H:%M:%S %Y' )
+            self.data.drop(columns=['Time'], inplace=True)
+        except:
+            self.data['m_date']=pd.to_datetime(self.data['Time'], format='%m/%d/%Y %H:%M:%S' )
+            self.data.drop(columns=['Time'], inplace=True)
+            
+        #rename to standard column names
+        self.data = self.data.rename(index=str, columns={"X":"x", "Y":"y","Lot ID":"lot_id"})
 
     
     def _process_raw_data_smv(self):

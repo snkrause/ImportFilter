@@ -7,7 +7,7 @@ Created on Thu Feb 18 14:22:56 2021
 
 from ImportFilter import Importfile
 import pandas as pd
-import os
+import os, glob
 #get path of directory script is executed from
 dirname = os.path.dirname(__file__)
 
@@ -35,7 +35,7 @@ data_object_smv=pd.DataFrame()
 for file in Filelist:
     file_object_smv=Importfile(equipment,product,recipe,file)
     file_object_smv.read_data()
-    data_object_smv=data_object_smv.append(file_object_smv.data)
+    data_object_smv=data_object_smv.append(file_object_smv.data, ignore_index=True)
     
 #elli
 Filelist=[dirname+"/testdata/Elli/test.txt"]
