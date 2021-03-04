@@ -7,11 +7,14 @@ Created on Thu Feb 18 14:22:56 2021
 
 from ImportFilter import Importfile
 import pandas as pd
+import os
+#get path of directory script is executed from
+dirname = os.path.dirname(__file__)
 
 #nuk
-Filelist=['//rt-smb-rtp1-office/data_nuk/NT311/Autosave/PFF1/CMS210M/SALNB.rcp/F36051.3/2021_2_15_17_24_1/LotResultSummaryAll.csv', '//rt-smb-rtp1-office/data_nuk/NT311/Autosave/PFF1/CMS210M/SALNB.rcp/F36051.3/2021_2_15_17_24_1/LotResultSummaryAll.csv']
-product='CMS210M'
-recipe='SALNB'
+Filelist=[dirname+'/testdata/NuK/LotResultSummaryAll.csv']
+product='test'
+recipe='test'
 equipment='NuK'
 
 data_object_nuk=pd.DataFrame()
@@ -22,9 +25,9 @@ for file in Filelist:
     data_object_nuk=data_object_nuk.append(file_object_nuk.data)
 
 #smv
-Filelist=['//rt-smb-rtp1-office/smartview/Daten_MFW4/CMP4/C74902/AB_NW_DIF_NAE_E_S/C7490201_NW_NQ130_SAMPLE30.REC', '//rt-smb-rtp1-office/smartview/Daten_MFW4/CMP4/C74902/AB_NW_DIF_NAE_E_S/C7490202_NW_NQ130_SAMPLE30.REC']
-product='CMS210M'
-recipe='SAMPLE30'
+Filelist=[dirname+"/testdata/SmV/TEST.REC"]
+product='test'
+recipe='test'
 equipment='SmV'
 
 data_object_smv=pd.DataFrame()
@@ -33,3 +36,16 @@ for file in Filelist:
     file_object_smv=Importfile(equipment,product,recipe,file)
     file_object_smv.read_data()
     data_object_smv=data_object_smv.append(file_object_smv.data)
+    
+#elli
+Filelist=[dirname+"/testdata/Elli/test.txt"]
+product='test'
+recipe='test'
+equipment='Elli'
+
+data_object_elli=pd.DataFrame()
+
+for file in Filelist:
+    file_object_elli=Importfile(equipment,product,recipe,file)
+    file_object_elli.read_data()
+    data_object_elli=data_object_elli.append(file_object_elli.data)
