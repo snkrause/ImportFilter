@@ -170,7 +170,7 @@ class Importfile:
             #split lines into columns
             df_wafer_2=df_wafer.str.split('\s+', expand=True).replace('N/A',np.nan)
             
-            #add column names
+            #add column names or empty columns if needed
             if len(df_wafer_2.columns)==len(names_col):
                 df_wafer_2.columns=names_col
             elif len(df_wafer_2.columns)<len(names_col):
@@ -232,6 +232,7 @@ class Importfile:
         """
         #create and calculate columns described above
         self.data = self.data.rename(index=str, columns={"Slot Number":"Wafer Number","Tool Name":"Tool","Port Number":"Cassette Plate","Control Job Run Started":"Cassette Run Started","Error":"flag_1"})
+        
         #add 'wafer_id'
         if len(self.data['Wafer Number'][0:1][0])<2:
             self.data['wafer_id']=self.data['Lot ID'][0:1][0].split('.')[0]+'-0'+self.data['Wafer Number'][0:1][0]
